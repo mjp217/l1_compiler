@@ -23,14 +23,7 @@ type address = int
 type store = address -> value 
 
 and value = 
-     | REF of address 
      | INT of int 
-     | BOOL of bool 
-     | UNIT
-     | PAIR of value * value 
-     | INL of value 
-     | INR of value 
-     | FUN of ((value * store) -> (value * store)) 
 
 type env = var -> value 
 
@@ -41,14 +34,7 @@ type bindings = binding list
 (* auxiliary functions *) 
 
 let rec string_of_value = function 
-     | REF a -> "address(" ^ (string_of_int a) ^ ")"
-     | BOOL b -> string_of_bool b
      | INT n -> string_of_int n 
-     | UNIT -> "()"
-     | PAIR(v1, v2) -> "(" ^ (string_of_value v1) ^ ", " ^ (string_of_value v2) ^ ")"
-     | INL v -> "inl(" ^ (string_of_value v) ^ ")"
-     | INR  v -> "inr(" ^ (string_of_value v) ^ ")"
-     | FUN _ -> "FUNCTION( ... )" 
     
 (* update : (env * binding) -> env 
    update : (store * (address * value)) -> store
@@ -68,20 +54,6 @@ let do_oper = function
   | (DIV,  INT m,   INT n)  -> INT (m / n)
   | (op, _, _)  -> complain ("malformed binary operator: " ^ (string_of_oper op))
 
-let do_deref = function 
-  | (REF a, store) -> (store a, store) 
-  | (_, _)  -> complain "deref expecting address"
-
-let next_address = ref 0 
-
-let new_address () = let a = !next_address in (next_address := a + 1; a) 
-
-let do_ref = function 
-  | (v, store) -> let a = new_address () in (REF a, update(store, (a, v)))
-
-let do_assign a = function 
-  | (v, store) -> (UNIT, update(store, (a, v)))
-
 (*
     interpret : (expr * env * store) -> (value * store) 
               : (expr * (var -> value) * address -> value) -> value
@@ -91,7 +63,6 @@ let rec interpret (e, env, store) =
 	| Integer n        -> (INT n, store) 
     | Op(e1, op, e2)   -> let (v1, store1) = interpret(e1, env, store) in 
                           let (v2, store2) = interpret(e2, env, store1) in (do_oper(op, v1, v2), store2) 
-    | Seq []           -> (UNIT, store) (* should not be seen ... *) 
     | Seq [e]          -> interpret (e, env, store)
     | Seq (e :: rest)  -> let (_,  store1) = interpret(e, env, store) 
                           in interpret(Seq rest, env, store1) 

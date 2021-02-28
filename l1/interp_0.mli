@@ -3,14 +3,7 @@ type address
 type store = address -> value 
 
 and value = 
-     | REF of address 
      | INT of int 
-     | BOOL of bool 
-     | UNIT
-     | PAIR of value * value 
-     | INL of value 
-     | INR of value 
-     | FUN of ((value * store) -> (value * store))
 
 type env = Ast.var -> value 
 
