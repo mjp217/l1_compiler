@@ -20,14 +20,14 @@ let wrap file e interpret msg =
 let i0 (file, e)   = wrap file e (fun x -> Interp_0.string_of_value (Interp_0.interpret_top_level x)) "Interpreter 0"
 let i1 (file, e)   = wrap file e (fun x -> Interp_1.string_of_value (Interp_1.interpret x)) "Interpreter 1"
 let i2 (file, e)   = wrap file e (fun x -> Interp_2.string_of_value (fst (Interp_2.interpret x))) "Interpreter 2"
-(*let i3 (file, e)   = wrap file e (fun x -> Interp_1.string_of_value (Interp_1.interpret x)) "Interpreter 3"
-let i4 (file, e)   = wrap file e (fun x -> Jargon.string_of_value (Jargon.interpret x)) "Jargon VM"
+let i3 (file, e)   = wrap file e (fun x -> Interp_3.string_of_value (Interp_3.interpret x)) "Interpreter 3"
+(*let i4 (file, e)   = wrap file e (fun x -> Jargon.string_of_value (Jargon.interpret x)) "Jargon VM"
 *)	  
 			  
 (* show compiled code *)
 let i2cc (file, e)   = let _ = print_string (Interp_2.string_of_code (Interp_2.compile e)) in None
-(*let i3cc (file, e)   = let _ = print_string (Interp_2.string_of_code (Interp_2.compile e)) in None
-let i4cc (file, e)   = let _ = print_string (Jargon.string_of_listing (Jargon.compile e)) in None*)
+let i3cc (file, e)   = let _ = print_string (Interp_3.string_of_code (Interp_3.compile e)) in None
+(*let i4cc (file, e)   = let _ = print_string (Jargon.string_of_listing (Jargon.compile e)) in None*)
 
 let interpreters = [
     (* use-flag,  the action, a description string *)
@@ -35,9 +35,9 @@ let interpreters = [
     (Option.use_i1,                              i1,   "Interpreter 1");
     (Option.use_i2 && not(Option.show_compiled), i2,   "Interpreter 2");
     (Option.show_compiled && Option.use_i2     , i2cc, "Interpreter 2, compiled code");
-    (*(Option.use_i3 && not(Option.show_compiled), i3,   "Interpreter 3");
+    (Option.use_i3 && not(Option.show_compiled), i3,   "Interpreter 3");
     (Option.show_compiled && Option.use_i3     , i3cc, "Interpreter 3, compiled code");
-    (Option.use_jargon && not(Option.show_compiled), i4,   "Jargon VM"    );
+    (*(Option.use_jargon && not(Option.show_compiled), i4,   "Jargon VM"    );
     (Option.show_compiled && Option.use_jargon     , i4cc, "Jargon, compiled code")*)
 ]
 
