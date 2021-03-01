@@ -18,12 +18,14 @@ type type_expr =
 
 type formals = (var * type_expr) list
 
-type oper = ADD | MUL | DIV | SUB 
+type oper = ADD | MUL | DIV | SUB | GEQ
 
 type unary_oper = NEG 
 
 type expr = 
        | Integer of loc * int
+       | Boolean of loc * bool
+       | If of loc * expr * expr * expr
        | UnaryOp of loc * unary_oper * expr
        | Op of loc * expr * oper * expr
        | Seq of loc * (expr list)
@@ -33,6 +35,8 @@ and lambda = var * type_expr * expr
 
 let  loc_of_expr = function 
     | Integer (loc, _)              -> loc 
+    | Boolean (loc, _)              -> loc   
+    | If (loc, _, _, _)             -> loc
     | UnaryOp(loc, _, _)            -> loc 
     | Op(loc, _, _, _)              -> loc 
 	| Seq(loc, _)                   -> loc
@@ -67,6 +71,7 @@ let pp_bop = function
   | MUL  -> "*" 
   | DIV  -> "/" 
   | SUB -> "-" 
+  | GEQ -> ">="
 
 let string_of_oper = pp_bop 
 let string_of_unary_oper = pp_uop 
@@ -79,6 +84,8 @@ let pp_binary ppf op = fstring ppf (pp_bop op)
 (* ignore locations *) 
 let rec pp_expr ppf = function 
     | Integer (_, n)      -> fstring ppf (string_of_int n)
+    | Boolean (_, v)      -> fstring ppf (string_of_bool v)
+    | If (_, e1, e2, e3)  -> fprintf ppf "if %a then %a else %a" pp_expr e1 pp_expr e2 pp_expr e3
     | UnaryOp(_, op, e)   -> fprintf ppf "%a(%a)" pp_unary op pp_expr e 
     | Op(_, e1, op, e2)   -> fprintf ppf "(%a %a %a)" pp_expr e1  pp_binary op pp_expr e2 
     | Seq (_, [])         -> () 
@@ -104,6 +111,7 @@ let string_of_bop = function
   | MUL  -> "MUL" 
   | DIV  -> "DIV" 
   | SUB -> "SUB"
+  | GEQ -> "GEQ"
 
 let mk_con con l = 
     let rec aux carry = function 
@@ -123,6 +131,8 @@ let rec string_of_type = function
 
 let rec string_of_expr = function 
     | Integer (_, n)      -> mk_con "Integer" [string_of_int n] 
+    | Boolean (_, v)      -> mk_con "Boolean" [string_of_bool v]
+    | If (_, e1, e2, e3)  -> mk_con "If" [string_of_expr e1; string_of_expr e2; string_of_expr e3]
     | UnaryOp(_, op, e)   -> mk_con "UnaryOp" [string_of_uop op; string_of_expr e]
     | Op(_, e1, op, e2)   -> mk_con "Op" [string_of_expr e1; string_of_bop op; string_of_expr e2]
     | Seq (_, el)         -> mk_con "Seq" [string_of_expr_list el]

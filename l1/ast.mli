@@ -1,12 +1,14 @@
 
 type var = string 
 
-type oper = ADD | MUL | DIV | SUB
+type oper = ADD | MUL | DIV | SUB | GEQ
 
 type unary_oper = NEG
 
 type expr = 
        | Integer of int
+       | Boolean of bool
+       | If of expr * expr * expr
        | UnaryOp of unary_oper * expr
        | Op of expr * oper * expr
        | Seq of (expr list)

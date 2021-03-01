@@ -63,10 +63,19 @@ let make_bop loc bop (e1, t1) (e2, t2) =
     | DIV, TEint,  t      -> report_expecting e2 "integer" t
     | DIV, t,      _      -> report_expecting e1 "integer" t
 
+let make_if loc (e1, t1) (e2, t2) (e3, t3) =
+     match t1 with
+     | TEbool ->
+          if match_types (t2, t3)
+          then (If(loc, e1, e2, e3), t2)
+          else report_type_mismatch (e2, t2) (e3, t3)
+      | ty -> report_expecting e1 "boolean" ty
 
 let rec  infer env e = 
     match e with 
     | Integer _            -> (e, TEint)
+    | Boolean _            -> (e, TEbool)
+    | If (loc, e1, e2, e3)      -> make_if loc (infer env e1) (infer env e2) (infer env e3)  
     | UnaryOp(loc, uop, e) -> make_uop loc uop (infer env e) 
     | Op(loc, e1, bop, e2) -> make_bop loc bop (infer env e1) (infer env e2) 
     | Seq(loc, el)         -> infer_seq loc env el 

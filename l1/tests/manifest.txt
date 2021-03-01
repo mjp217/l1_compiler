@@ -1,3 +1,7 @@
 sum1 6
 multisum1 27
 seq1 7
+if1 4
+while1 0
+loc1 7
+skip1 300

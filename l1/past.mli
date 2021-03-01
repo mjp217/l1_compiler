@@ -14,12 +14,14 @@ type type_expr =
    | TEproduct of type_expr * type_expr
    | TEunion of type_expr * type_expr
 
-type oper = ADD | MUL | DIV | SUB
+type oper = ADD | MUL | DIV | SUB | GEQ
 
 type unary_oper = NEG 
 
 type expr = 
        | Integer of loc * int
+       | Boolean of loc * bool
+       | If of loc * expr * expr * expr
        | UnaryOp of loc * unary_oper * expr
        | Op of loc * expr * oper * expr
 	   | Seq of loc * (expr list)

@@ -17,23 +17,35 @@ let newline = ('\010' | "\013\010" )
 let ident_reg_exp = ['A'-'Z' 'a'-'z']+ ['0'-'9' 'A'-'Z' 'a'-'z' '_' '\'']* 
 let int_reg_exp = ['0'-'9']+
 
-	rule token = parse
-	  | [' ' '\t']     { token lexbuf }     (* skip blanks *)
-	  | '+'            { ADD }
-	  | '-'            { SUB }
-	  | '*'            { MUL }
-	  | '/'            { DIV }
-	  | '('            { LPAREN }
-	  | ')'            { RPAREN }
-	  | ';'	           { SEMICOLON }
-	  | "begin"        { BEGIN }
-	  | "end"          { END }
-	  | eof            { EOF }  
-	  | int_reg_exp { INT (int_of_string (Lexing.lexeme lexbuf)) }
-	  | "(*" { comment lexbuf; token lexbuf }
-	  | newline { next_line lexbuf; token lexbuf } 
-	  | eof { EOF }
-	  | _ { Errors.complain ("Lexer : Illegal character " ^ (Char.escaped(Lexing.lexeme_char lexbuf 0)))
+rule token = parse
+	| [' ' '\t']     { token lexbuf }     (* skip blanks *)
+	| '+'            { ADD }
+	| '-'            { SUB }
+	| '*'            { MUL }
+	| '/'            { DIV }
+	| '('            { LPAREN }
+	| ')'            { RPAREN }
+	| ';'	         { SEMICOLON }
+	| "true"         { TRUE }
+	| "false"        { FALSE }
+	| ">="           { GEQ }
+	| "skip"         { SKIP }
+	| "if"           { IF }
+	| "then"         { THEN }
+	| "else"         { ELSE }
+	| ":="           { ASSIGN }
+	| "while"        { WHILE }
+	| "do"           { DO }
+	| '!'            { DEREF }
+	| "begin"        { BEGIN }
+	| "end"          { END }
+	| eof            { EOF }  
+	| ident_reg_exp  { LOC (Lexing.lexeme lexbuf) }
+	| int_reg_exp { INT (int_of_string (Lexing.lexeme lexbuf)) }
+	| "(*" { comment lexbuf; token lexbuf }
+	| newline { next_line lexbuf; token lexbuf } 
+	| eof { EOF }
+	| _ { Errors.complain ("Lexer : Illegal character " ^ (Char.escaped(Lexing.lexeme_char lexbuf 0)))
 }
 
 and comment = parse

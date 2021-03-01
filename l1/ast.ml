@@ -1,12 +1,14 @@
 
 type var = string 
 
-type oper = ADD | MUL | DIV | SUB 
+type oper = ADD | MUL | DIV | SUB | GEQ
 
 type unary_oper = NEG
 
 type expr = 
        | Integer of int
+       | Boolean of bool
+       | If of expr * expr * expr
        | UnaryOp of unary_oper * expr
        | Op of expr * oper * expr
        | Seq of (expr list)
@@ -31,6 +33,7 @@ let pp_bop = function
   | MUL  -> "*" 
   | DIV  -> "/" 
   | SUB -> "-" 
+  | GEQ -> ">="
 
 
 let string_of_oper = pp_bop 
@@ -44,6 +47,8 @@ let pp_binary ppf t = fstring ppf (pp_bop t)
 
 let rec pp_expr ppf = function 
     | Integer n        -> fstring ppf (string_of_int n)
+    | Boolean v        -> fstring ppf (string_of_bool v)
+    | If (e1, e2, e3)  -> fprintf ppf "if %a then %a else %a" pp_expr e1 pp_expr e2 pp_expr e3
     | UnaryOp(op, e)   -> fprintf ppf "%a(%a)" pp_unary op pp_expr e 
     | Op(e1, op, e2)   -> fprintf ppf "(%a %a %a)" pp_expr e1  pp_binary op pp_expr e2 
 
@@ -73,6 +78,7 @@ let string_of_bop = function
   | MUL  -> "MUL" 
   | DIV  -> "DIV" 
   | SUB -> "SUB" 
+  | GEQ -> "GEQ"
 
 let mk_con con l = 
     let rec aux carry = function 
@@ -83,6 +89,8 @@ let mk_con con l =
 
 let rec string_of_expr = function 
     | Integer n        -> mk_con "Integer" [string_of_int n] 
+    | Boolean v        -> mk_con "Boolean" [string_of_bool v]
+    | If (e1, e2, e3)  -> mk_con "IF" [string_of_expr e1; string_of_expr e2; string_of_expr e3]
     | UnaryOp(op, e)   -> mk_con "UnaryOp" [string_of_uop op; string_of_expr e]
     | Op(e1, op, e2)   -> mk_con "Op" [string_of_expr e1; string_of_bop op; string_of_expr e2]
     | Seq el           -> mk_con "Seq" [string_of_expr_list el] 

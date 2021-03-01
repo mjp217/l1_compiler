@@ -24,6 +24,7 @@ type store = address -> value
 
 and value = 
      | INT of int 
+     | BOOLEAN of bool
 
 type env = var -> value 
 
@@ -35,6 +36,7 @@ type bindings = binding list
 
 let rec string_of_value = function 
      | INT n -> string_of_int n 
+     | BOOLEAN v -> string_of_bool v
     
 (* update : (env * binding) -> env 
    update : (store * (address * value)) -> store
@@ -61,11 +63,13 @@ let do_oper = function
 let rec interpret (e, env, store) = 
     match e with 
 	| Integer n        -> (INT n, store) 
-    | Op(e1, op, e2)   -> let (v1, store1) = interpret(e1, env, store) in 
-                          let (v2, store2) = interpret(e2, env, store1) in (do_oper(op, v1, v2), store2) 
-    | Seq [e]          -> interpret (e, env, store)
-    | Seq (e :: rest)  -> let (_,  store1) = interpret(e, env, store) 
-                          in interpret(Seq rest, env, store1) 
+  | Boolean v        -> (BOOLEAN v, store)
+  | If (e1, e2, e3)  -> let (BOOLEAN v, _) = interpret(e1, env, store) in if v then (interpret (e2, env, store)) else (interpret (e3, env, store))
+  | Op(e1, op, e2)   -> let (v1, store1) = interpret(e1, env, store) in 
+                        let (v2, store2) = interpret(e2, env, store1) in (do_oper(op, v1, v2), store2) 
+  | Seq [e]          -> interpret (e, env, store)
+  | Seq (e :: rest)  -> let (_,  store1) = interpret(e, env, store) 
+                        in interpret(Seq rest, env, store1) 
 
 (* env_empty : env *) 
 let empty_env = fun x -> complain (x ^ " is not defined!\n")
