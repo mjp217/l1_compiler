@@ -19,12 +19,34 @@ type oper = ADD | MUL | DIV | SUB | GEQ
 type unary_oper = NEG 
 
 type expr = 
+       | Unit of loc  
+       | What of loc 
+       | Var of loc * var
        | Integer of loc * int
        | Boolean of loc * bool
-       | If of loc * expr * expr * expr
        | UnaryOp of loc * unary_oper * expr
        | Op of loc * expr * oper * expr
-	   | Seq of loc * (expr list)
+       | If of loc * expr * expr * expr
+       | Pair of loc * expr * expr
+       | Fst of loc * expr 
+       | Snd of loc * expr 
+       | Inl of loc * type_expr * expr 
+       | Inr of loc * type_expr * expr 
+       | Case of loc * expr * lambda * lambda 
+
+       | While of loc * expr * expr 
+       | Seq of loc * (expr list)
+       | Ref of loc * expr 
+       | Deref of loc * expr 
+       | Assign of loc * expr * expr
+
+       | Lambda of loc * lambda 
+       | App of loc * expr * expr 
+       | Let of loc * var * type_expr * expr * expr
+       | LetFun of loc * var * lambda * type_expr * expr
+       | LetRecFun of loc * var * lambda * type_expr * expr
+
+and lambda = var * type_expr * expr 
 
 val loc_of_expr : expr -> loc 
 val string_of_loc : loc -> string 
