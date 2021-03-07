@@ -24,6 +24,7 @@ type expr =
        | Var of loc * var
        | Integer of loc * int
        | Boolean of loc * bool
+       | Location of loc * string
        | UnaryOp of loc * unary_oper * expr
        | Op of loc * expr * oper * expr
        | If of loc * expr * expr * expr
@@ -33,18 +34,14 @@ type expr =
        | Inl of loc * type_expr * expr 
        | Inr of loc * type_expr * expr 
        | Case of loc * expr * lambda * lambda 
-
        | While of loc * expr * expr 
        | Seq of loc * (expr list)
        | Ref of loc * expr 
-       | Deref of loc * expr 
+       | Skip of loc
+       | Deref of loc * expr
        | Assign of loc * expr * expr
+       | Let of loc * var * expr * expr
 
-       | Lambda of loc * lambda 
-       | App of loc * expr * expr 
-       | Let of loc * var * type_expr * expr * expr
-       | LetFun of loc * var * lambda * type_expr * expr
-       | LetRecFun of loc * var * lambda * type_expr * expr
 
 and lambda = var * type_expr * expr 
 

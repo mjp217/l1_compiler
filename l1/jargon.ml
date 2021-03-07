@@ -630,15 +630,7 @@ let rec comp vmap = function
   | Seq (e ::rest) -> let (defs1, c1) = comp vmap e in  
                       let (defs2, c2) = comp vmap (Seq rest) in  
                         (defs1 @ defs2, c1 @ [POP] @ c2)
-  | Ref e          -> let (defs, c) = comp vmap e in (defs, c @ [MK_REF])
-  | Deref e        -> let (defs, c) = comp vmap e in (defs, c @ [DEREF])
-  | Assign(e1, e2) -> let (defs1, c1) = comp vmap e1 in  
-                      let (defs2, c2) = comp vmap e2 in 
-                          (defs1 @ defs2, c1 @ c2 @ [ASSIGN])
-  | App(e1, e2)    -> let (defs1, c1) = comp vmap e1 in   
-                      let (defs2, c2) = comp vmap e2 in  
-                           (defs1 @ defs2, c2 @ c1 @ [APPLY]) 
-  | Var x           -> ([], [LOOKUP(find vmap x)])
+
 
 and comp_lambda vmap (f_opt, x, e) = 
     let bound_vars = match f_opt with | None -> [x]          | Some f -> [x; f] in 

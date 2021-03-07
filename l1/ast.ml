@@ -10,22 +10,21 @@ type expr =
        | Var of var
        | Integer of int
        | Boolean of bool
+       | Location of var
+       | If of expr * expr * expr
+       | While of expr * expr
        | UnaryOp of unary_oper * expr
        | Op of expr * oper * expr
-       | If of expr * expr * expr
        | Pair of expr * expr
        | Fst of expr 
        | Snd of expr 
        | Inl of expr 
        | Inr of expr 
        | Seq of (expr list)
-       | Ref of expr 
-       | Deref of expr 
+       | Skip
+       | Deref of expr
        | Assign of expr * expr 
-       | Lambda of lambda 
-       | App of expr * expr
-       | LetFun of var * lambda * expr
-       | LetRecFun of var * lambda * expr
+       | Let of var * expr * expr
 
 and lambda = var * expr 
 
@@ -62,11 +61,16 @@ let pp_binary ppf t = fstring ppf (pp_bop t)
 let rec pp_expr ppf = function 
     | Integer n        -> fstring ppf (string_of_int n)
     | Boolean v        -> fstring ppf (string_of_bool v)
+    | Location v       -> fprintf ppf "%s" v
     | If (e1, e2, e3)  -> fprintf ppf "if %a then %a else %a" pp_expr e1 pp_expr e2 pp_expr e3
+    | While (e1, e2)   -> fprintf ppf "while %a do %a" pp_expr e1 pp_expr e2
     | UnaryOp(op, e)   -> fprintf ppf "%a(%a)" pp_unary op pp_expr e 
     | Op(e1, op, e2)   -> fprintf ppf "(%a %a %a)" pp_expr e1  pp_binary op pp_expr e2 
-
+    | Skip             -> fprintf ppf "skip"
     | Seq el           -> fprintf ppf "begin %a end" pp_expr_list el 
+    | Deref e1          -> fprintf ppf "!%a" pp_expr e1
+    | Assign (e1, e2)   -> fprintf ppf "%a := %a" pp_expr e1 pp_expr e2
+    | Let (e1, e2, e3)     -> fprintf ppf "let %s := %a in %a end" e1 pp_expr e2 pp_expr e3
 	
 and pp_expr_list ppf = function 
   | [] -> () 
@@ -104,10 +108,16 @@ let mk_con con l =
 let rec string_of_expr = function 
     | Integer n        -> mk_con "Integer" [string_of_int n] 
     | Boolean v        -> mk_con "Boolean" [string_of_bool v]
-    | If (e1, e2, e3)  -> mk_con "IF" [string_of_expr e1; string_of_expr e2; string_of_expr e3]
+    | Location e       -> mk_con "Location" [e]
+    | If (e1, e2, e3)  -> mk_con "If" [string_of_expr e1; string_of_expr e2; string_of_expr e3]
+    | Skip             -> "Skip"
+    | While (e1, e2)   -> mk_con "While" [string_of_expr e1; string_of_expr e2]
     | UnaryOp(op, e)   -> mk_con "UnaryOp" [string_of_uop op; string_of_expr e]
     | Op(e1, op, e2)   -> mk_con "Op" [string_of_expr e1; string_of_bop op; string_of_expr e2]
     | Seq el           -> mk_con "Seq" [string_of_expr_list el] 
+    | Deref e1         -> mk_con "Deref" [string_of_expr e1]
+    | Assign (e1, e2)     -> mk_con "Assign" [string_of_expr e1; string_of_expr e2]
+    | Let (e1, e2, e3) -> mk_con "Let" [e1; string_of_expr e2; string_of_expr e3]
 
 and string_of_expr_list = function 
   | [] -> "" 

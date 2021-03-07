@@ -1,1 +1,4 @@
-l := 3; while !l >= 1 do l := !l - 1; !l
+let loc := 3 in begin
+    while !loc >= 1 do loc := !loc - 1; 
+    !loc 
+end end

@@ -1,31 +1,30 @@
 
 type var = string 
 
-type oper = ADD | MUL | DIV | SUB | GEQ
+type oper = ADD | MUL | DIV | SUB | GEQ 
 
-type unary_oper = NEG
+type unary_oper = NEG 
 
 type expr = 
        | Unit  
        | Var of var
        | Integer of int
        | Boolean of bool
+       | Location of var
+       | If of expr * expr * expr
+       | While of expr * expr
        | UnaryOp of unary_oper * expr
        | Op of expr * oper * expr
-       | If of expr * expr * expr
        | Pair of expr * expr
        | Fst of expr 
        | Snd of expr 
        | Inl of expr 
        | Inr of expr 
        | Seq of (expr list)
-       | Ref of expr 
+       | Skip
        | Deref of expr 
-       | Assign of expr * expr 
-       | Lambda of lambda 
-       | App of expr * expr
-       | LetFun of var * lambda * expr
-       | LetRecFun of var * lambda * expr
+       | Assign of expr * expr
+       | Let of var * expr * expr	   
 
 and lambda = var * expr 
 

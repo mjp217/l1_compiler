@@ -39,9 +39,11 @@ rule token = parse
 	| '!'            { DEREF }
 	| "begin"        { BEGIN }
 	| "end"          { END }
+	| "let"          { LET }
+	| "in"           { IN }
 	| eof            { EOF }  
-	| ident_reg_exp  { LOC (Lexing.lexeme lexbuf) }
 	| int_reg_exp { INT (int_of_string (Lexing.lexeme lexbuf)) }
+	| ident_reg_exp  { LOC (Lexing.lexeme lexbuf) }
 	| "(*" { comment lexbuf; token lexbuf }
 	| newline { next_line lexbuf; token lexbuf } 
 	| eof { EOF }
