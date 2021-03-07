@@ -6,13 +6,33 @@ type label = string
 type location = label * (address option) 
 
 type value = 
+  | REF of address 
   | INT of int 
+  | BOOL of bool 
+  | UNIT
+  | PAIR of value * value 
+  | INL of value 
+  | INR of value 
+  | CLOSURE of location * env
+  | REC_CLOSURE of location
 
 and instruction = 
   | PUSH of value 
+  | LOOKUP of Ast.var 
   | UNARY of Ast.unary_oper 
   | OPER of Ast.oper 
+  | SWAP
   | POP 
+  | BIND of Ast.var 
+  | FST
+  | SND
+  | RETURN 
+  | MK_PAIR 
+  | MK_INL
+  | MK_INR
+  | MK_REF 
+  | MK_CLOSURE of location
+  | MK_REC of Ast.var * location
   | TEST of location 
   | CASE of location
   | GOTO of location
