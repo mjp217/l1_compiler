@@ -62,6 +62,9 @@ let make_bop loc bop (e1, t1) (e2, t2) =
     | DIV, TEint,  TEint  -> (Op(loc, e1, bop, e2), t1) 
     | DIV, TEint,  t      -> report_expecting e2 "integer" t
     | DIV, t,      _      -> report_expecting e1 "integer" t
+    | GEQ, TEint, TEint   -> (Op(loc, e1, bop, e2), TEbool)
+    | GEQ, TEint, t       -> report_expecting e2 "integer" t
+    | GEQ, t,     _       -> report_expecting e2 "integer" t
 
 let make_if loc (e1, t1) (e2, t2) (e3, t3) =
      match t1 with
@@ -71,14 +74,25 @@ let make_if loc (e1, t1) (e2, t2) (e3, t3) =
           else report_type_mismatch (e2, t2) (e3, t3)
       | ty -> report_expecting e1 "boolean" ty
 
+let make_while loc (e1, t1) (e2, t2) =
+     match t1 with
+     | TEbool -> (While(loc, e1, e2), TEunit)
+      | ty -> report_expecting e1 "boolean" ty
+
 let rec  infer env e = 
     match e with 
     | Integer _            -> (e, TEint)
     | Boolean _            -> (e, TEbool)
+    | Location (loc, e1)   -> (e, find loc e1 env)
     | If (loc, e1, e2, e3)      -> make_if loc (infer env e1) (infer env e2) (infer env e3)  
+    | While (loc, e1, e2)  -> make_while loc (infer env e1) (infer env e2)
     | UnaryOp(loc, uop, e) -> make_uop loc uop (infer env e) 
     | Op(loc, e1, bop, e2) -> make_bop loc bop (infer env e1) (infer env e2) 
     | Seq(loc, el)         -> infer_seq loc env el 
+    | Skip(loc)            -> (e, TEunit)
+    | Deref(loc, e1)       -> (Deref(loc, e), TEint)
+    | Assign(loc, e1, e2)  -> (Assign(loc, e1, e2), TEunit)
+    | Let(loc, e1, e2, e3) -> let (_, t) = (infer env e3) in (Let(loc, e1, e2, e3), t)
 
 and infer_seq loc env el = 
     let rec aux carry = function 

@@ -5,6 +5,8 @@ type store = address -> value
 and value = 
      | INT of int 
      | BOOLEAN of bool
+     | LOC of address
+     | SKIP
 
 type env = Ast.var -> value 
 

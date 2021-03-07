@@ -18,7 +18,13 @@ let translate_bop = function
 let rec translate_expr = function 
     | Past.Integer(_, n)     -> Ast.Integer n
     | Past.Boolean(_, v)     -> Ast.Boolean v
+    | Past.Location(_, e)    -> Ast.Location e
     | Past.If(_, e1, e2, e3)    -> Ast.If(translate_expr e1, translate_expr e2, translate_expr e3)
+    | Past.While(_, e1, e2)  -> Ast.While(translate_expr e1, translate_expr e2)
     | Past.UnaryOp(_, op, e) -> Ast.UnaryOp(translate_uop op, translate_expr e)
     | Past.Op(_, e1, op, e2) -> Ast.Op(translate_expr e1, translate_bop op, translate_expr e2)
     | Past.Seq(_, e1) -> Ast.Seq(List.map translate_expr e1)
+    | Past.Skip(_)   -> Ast.Skip
+    | Past.Deref (_, e1) -> Ast.Deref(translate_expr e1)
+    | Past.Assign (_, e1, e2) -> Ast.Assign(translate_expr e1, translate_expr e2)
+    | Past.Let (_, e1, e2, e3) -> Ast.Let(e1, translate_expr e2, translate_expr e3)

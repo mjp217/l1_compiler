@@ -21,10 +21,16 @@ type unary_oper = NEG
 type expr = 
        | Integer of loc * int
        | Boolean of loc * bool
+       | Location of loc * string
        | If of loc * expr * expr * expr
+       | While of loc * expr * expr
        | UnaryOp of loc * unary_oper * expr
        | Op of loc * expr * oper * expr
 	   | Seq of loc * (expr list)
+      | Skip of loc
+      | Deref of loc * expr
+      | Assign of loc * expr * expr
+      | Let of loc * var * expr * expr
 
 val loc_of_expr : expr -> loc 
 val string_of_loc : loc -> string 
