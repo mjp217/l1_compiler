@@ -1,4 +1,0 @@
-let loc := 3 in begin
-    while !loc >= 1 do loc := !loc - 1; 
-    !loc 
-end end
