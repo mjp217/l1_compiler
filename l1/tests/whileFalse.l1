@@ -1,0 +1,6 @@
+let loc := 6 in 
+begin
+    while !loc >= 7 do loc := !loc - 1;
+    !loc
+    end
+end
