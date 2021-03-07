@@ -1,1 +1,1 @@
-l := 7; !l
+let l := 7 in !l end
