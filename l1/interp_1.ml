@@ -110,6 +110,7 @@ let do_oper = function
   | (SUB,  INT m,   INT n)  -> INT (m - n)
   | (MUL,  INT m,   INT n)  -> INT (m * n)
   | (DIV,  INT m,   INT n)  -> INT (m / n)
+  | (GEQ,  INT m,   INT n)  -> BOOL (m >= n)
   | (op, _, _)  -> complain ("malformed binary operator: " ^ (string_of_oper op))
 
 
@@ -206,6 +207,7 @@ let step = function
  | EXAMINE(Inr e,                       env, k) -> EXAMINE(e,  env, MKINR :: k) 
  | EXAMINE(Seq [e],                     env, k) -> EXAMINE(e, env, k) 
  | EXAMINE(Seq (e :: rest),             env, k) -> EXAMINE(e, env, TAIL (rest, env) :: k) 
+ | EXAMINE(Skip,                        env, k) -> EXAMINE(Unit, env, k)
  (* EXAMINE --> COMPUTE *) 
  | EXAMINE(Unit,              _, k) -> COMPUTE(k, UNIT) 
  | EXAMINE(Var x,           env, k) -> COMPUTE(k, lookup (env, x))
