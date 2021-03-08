@@ -1,0 +1,5 @@
+let l1 := 4 in
+let l2 := 5 in
+!l1 >= !l2
+end
+end

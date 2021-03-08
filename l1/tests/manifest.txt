@@ -1,7 +1,14 @@
 sum1 6
 multisum1 27
 seq1 7
-if1 4
-while1 0
-loc1 7
+ifTrue 4
+ifFalse 10
+ifEval 1
+whileTrue 0
+whileFalse 6
 skip1 300
+geqTrue true
+geqFalse false
+geqEquals true
+geqEval false
+assignAndDeref 5
