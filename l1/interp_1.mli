@@ -10,7 +10,8 @@ type value =
      | INL of value 
      | INR of value 
      | REC_CLOSURE of closure
-     | CLOSURE of closure  
+     | CLOSURE of closure 
+     | Var of string
 
 and closure = Ast.var * Ast.expr * env 
 

@@ -29,6 +29,7 @@ type value =
      | INR of value 
      | REC_CLOSURE of closure
      | CLOSURE of closure 
+     | Var of string
 
 and closure = var * expr * env 
 
@@ -192,6 +193,11 @@ let new_address () = let a = !next_address in (next_address := a + 1; a)
 
 let mk_ref v = let a = new_address () in let _ = heap.(a) <- v in REF a 
 
+let mk_fun(x, body, env) = 
+    let fvars = Free_vars.free_vars ([x], body) in 
+    let smaller_env = filter_env fvars env in 
+      CLOSURE(x, body, smaller_env)
+
 let do_assign a v = (heap.(a) <- v)
 
  
@@ -208,12 +214,14 @@ let step = function
  | EXAMINE(Seq [e],                     env, k) -> EXAMINE(e, env, k) 
  | EXAMINE(Seq (e :: rest),             env, k) -> EXAMINE(e, env, TAIL (rest, env) :: k) 
  | EXAMINE(Skip,                        env, k) -> EXAMINE(Unit, env, k)
- | EXAMINE(Let(v, e1, e2),              env, k) -> EXAMINE(e1, env, MKREF :: k)
+ | EXAMINE(Assign(e1,e2),               env, k) -> EXAMINE(e1, env, ASSIGN_FST(e2,env)::k)
  (* EXAMINE --> COMPUTE *) 
  | EXAMINE(Unit,              _, k) -> COMPUTE(k, UNIT) 
  | EXAMINE(Var x,           env, k) -> COMPUTE(k, lookup (env, x))
  | EXAMINE(Integer n,         _, k) -> COMPUTE(k, INT n)
  | EXAMINE(Boolean b,         _, k) -> COMPUTE(k, BOOL b) 
+ | EXAMINE(Let(v, e1, e2),  env, k) -> let c = mk_fun(v, e2, env) in COMPUTE(APPLY(c) :: k, c)
+ (*| EXAMINE(Var e,             _, k) -> COMPUTE(MKREF :: k, e)*)
  (* COMPUTE --> COMPUTE *) 
  | COMPUTE((UNARY op) :: k,    v) -> COMPUTE(k ,(do_unary(op, v)))
  | COMPUTE(OPER(op, v1) :: k, v2) -> COMPUTE(k, do_oper(op, v1, v2))
@@ -222,8 +230,8 @@ let step = function
  | COMPUTE(SND :: k,  PAIR(_, v)) -> COMPUTE(k, v)
  | COMPUTE(MKINL :: k,         v) -> COMPUTE(k, (INL v))
  | COMPUTE(MKINR :: k,         v) -> COMPUTE(k, (INR v))
- | COMPUTE(MKREF :: k,         v) -> COMPUTE(ASSIGN(v) :: k , mk_ref v)
- | COMPUTE(ASSIGN(val) :: k, v)   -> do_assign(v, val); COMPUTE(k, UNIT)
+ | COMPUTE(MKREF :: k,         v) -> COMPUTE(k, mk_ref v)
+ | COMPUTE(ASSIGN(REF a) :: k, v) -> let _ = do_assign a v in COMPUTE(k, UNIT)
  | COMPUTE(DEREF :: k,     REF a) -> COMPUTE(k , heap.(a))
  | COMPUTE(WHILE (_, _, _) :: k,         BOOL false) -> COMPUTE(k, UNIT) 
  (* COMPUTE --> EXAMINE *) 
@@ -234,6 +242,7 @@ let step = function
  | COMPUTE(PAIR_FST (e2, env) :: k,             v1)  -> EXAMINE(e2, env, (MKPAIR v1) :: k)
  | COMPUTE(IF (e2, e3, env) :: k,        BOOL true)  -> EXAMINE(e2, env, k)
  | COMPUTE(IF (e2, e3, env) :: k,       BOOL false)  -> EXAMINE(e3, env, k)
+ | COMPUTE(ASSIGN_FST(e2, env)::k,               v)  -> EXAMINE(e2, env, ASSIGN v :: k)
 
 
  | COMPUTE((TAIL (el, env)) :: k,     _)  ->  EXAMINE(Seq el, env, k)
